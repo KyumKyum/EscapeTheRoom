@@ -19,6 +19,7 @@
 
         <activity android:name=".Room1"/>
         <activity android:name=".Room2"/>
+        <activity android:name=".Vault"/>
     </application>
 
 </manifest>

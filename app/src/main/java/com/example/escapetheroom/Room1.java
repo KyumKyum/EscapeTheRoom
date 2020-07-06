@@ -1,13 +1,10 @@
 package com.example.escapetheroom;
 
-import android.annotation.SuppressLint;
-import android.app.Dialog;
-import android.content.DialogInterface;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -32,6 +29,8 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
     private static final String DARK = "dark";
     private static final String FINAL_ANSWER = "final";
     private static final String ANSWER2 = "answer2";
+    private static final String EXIT_KEY = "exitkey";
+
 
     //Variables (widgets)
     private Button moveRight;
@@ -56,6 +55,9 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
     public Boolean isDark;
     public Boolean terminateAction;
     public Boolean correct;
+    public Boolean keyAvailable;
+    public Boolean event;
+
 
     SharedPreferences sharedPreferences;
 
@@ -86,6 +88,8 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
         isDark = false;
         terminateAction = false;
         correct = false;
+        keyAvailable = false;
+        event = false;
 
         moveRight.setOnClickListener(this);
         doorExit.setOnClickListener(this);
@@ -114,11 +118,27 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
                 break;
 
             case R.id.button_exit:
-                if(!doorKey){
+                if(keyAvailable){
+                    Toast.makeText(this, "정확히 들어맞는다!\n열리는 소리가 들렸어!", Toast.LENGTH_SHORT).show();
+                    doorKey = true;
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean(EXIT_KEY,false);
+                    editor.putBoolean(DOORKEY,true);
+                    editor.apply();
+                }
+                else if(!doorKey){
                     Toast.makeText(this, "굳게 잠겨있다.\nEXIT이라고 써져있는 것을 보니, 여기로 나가는거겠지.", Toast.LENGTH_SHORT).show();
-                } else if(isDark){
+                }else if(isDark){
                     Toast.makeText(this, "어두워서 아무것도 못하겠군.", Toast.LENGTH_SHORT).show();
                 }
+                else{
+                    Toast.makeText(this, "ESCAPED!!\n조촐한 게임 즐겨주셔서 감사합니다:)", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+
+                updateData();
+
                 break;
 
             case R.id.button_pic:
@@ -127,6 +147,7 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
                     terminateAction = false;
                     break;}
                 FamilyPic1 familyPic1 = new FamilyPic1(this);
+                familyPic1.setCanceledOnTouchOutside(false);
                 familyPic1.show();
                 Toast.makeText(this, "어린아이가 그린것 같은 가족그림이다.\n순수함이 느껴지는군.", Toast.LENGTH_SHORT).show();
                 break;
@@ -138,6 +159,7 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
                     break;}
 
                 Hint1 hint1 = new Hint1(this);
+                hint1.setCanceledOnTouchOutside(false);
                 hint1.show();
                 Toast.makeText(this, "책들 사이에 메모가 끼어져 있다.\n무슨 뜻이지?", Toast.LENGTH_SHORT).show();
                 break;
@@ -158,6 +180,7 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
                     Toast.makeText(this, "4자리 수를 입력할 수 있는 금고다.\n이걸 열어야지 탈출할 실마리를 얻을 수 있겠군.", Toast.LENGTH_LONG).show();
                 } else {
                     FamilyPic2 familyPic2 = new FamilyPic2(this);
+                    familyPic2.setCanceledOnTouchOutside(false);
                     familyPic2.show();
                     Toast.makeText(this, "검은 요정?\n...일단 '망치'라는 물건에 집중하도록 하자.", Toast.LENGTH_LONG).show();
                 }
@@ -224,6 +247,7 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
 
                 if(vaseBroken){
                     Hint2 hint2 = new Hint2(this);
+                    hint2.setCanceledOnTouchOutside(false);
                     hint2.show();
                     Toast.makeText(this, "......진정하자\n분명 숨겨진 의미가 있거나, 나중에 도움이 되는 단서가 될꺼야.", Toast.LENGTH_LONG).show();
                 } else{
@@ -290,6 +314,8 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
         remoteAvailable = sharedPreferences.getBoolean(REMOTE,false);
         isDark = sharedPreferences.getBoolean(DARK,false);
         correct = sharedPreferences.getBoolean(ANSWER2,false);
+        keyAvailable = sharedPreferences.getBoolean(EXIT_KEY,false);
+
 
         String list = itemList.getText().toString();
 
@@ -317,7 +343,24 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
             }
         }
 
-        if(isDark || correct ){
+        if(keyAvailable){
+            if(!(list.contains("열쇠 "))){
+                list += "열쇠 ";
+                itemList.setText(list);
+            }
+        } else {
+            if(list.contains("열쇠")){
+                list.replace("열쇠","");
+                itemList.setText(list);
+            }
+        }
+
+        if(keyAvailable && !event){
+            event = true;
+            Toast.makeText(this, "...불길한 시선이 느껴진다.", Toast.LENGTH_SHORT).show();
+        }
+
+        if(isDark || correct){
             dark.setVisibility(View.VISIBLE);
         } else {
             dark.setVisibility(View.INVISIBLE);

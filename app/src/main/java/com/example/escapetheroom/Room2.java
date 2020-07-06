@@ -25,6 +25,7 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
     private static final String ANSWER2 = "answer2";
     private static final String FINAL_ANSWER = "final";
     private static final String RET_CODE2 = "Vault2";
+    private static final String EXIT_KEY = "exitkey";
 
     //Variables (widgets)
     private Button moveLeft;
@@ -43,6 +44,8 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
     public Boolean glitterFound;
     public Boolean terminateAction;
     public Boolean correct;
+    public Boolean keyAvailable;
+    public Boolean event;
 
     SharedPreferences sharedPreferences;
 
@@ -73,6 +76,7 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
         glitterFound = false;
         terminateAction = false;
         correct = false;
+        keyAvailable = false;
 
         updateData();
     }
@@ -149,6 +153,7 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
                 } else{
                     if(glitterFound){
                         FamilyPic3 familyPic3 = new FamilyPic3(this);
+                        familyPic3.setCanceledOnTouchOutside(false);
                         familyPic3.show();
                         Toast.makeText(this, "...모두 데려갔다니...?\n젠장. 꽤 험한 일에 휘말린 것 같군.", Toast.LENGTH_SHORT).show();
                     }
@@ -164,6 +169,7 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
                     break;}
 
                 Hint3 hint3 = new Hint3(this);
+                hint3.setCanceledOnTouchOutside(false);
                 hint3.show();
                 Toast.makeText(this, "의미를 알 수 없는 문장의 나열...\n내가 이해하지 못하는 건가?", Toast.LENGTH_SHORT).show();
                 break;
@@ -181,6 +187,20 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
                     startActivityForResult(openVault,102);
 
                     Toast.makeText(this, "4자리 수를 입력할 수 있는 금고다.\n이걸 열어야지만 탈출할 수 있다는 느낌이 들어.", Toast.LENGTH_LONG).show();
+                } else {
+                    FamilyPic4 familyPic4 = new FamilyPic4(this);
+                    familyPic4.setCanceledOnTouchOutside(false);
+                    familyPic4.show();
+                    Toast.makeText(this, "...", Toast.LENGTH_SHORT).show();
+
+
+                    keyAvailable = true;
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean(EXIT_KEY,true);
+                    editor.apply();
+
+                    updateData();
+
                 }
 
 
@@ -195,7 +215,7 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
         isDark = sharedPreferences.getBoolean(DARK,false);
         glitterFound = sharedPreferences.getBoolean(GLITTER_FOUND,false);
         correct = sharedPreferences.getBoolean(ANSWER2,false);
-
+        keyAvailable = sharedPreferences.getBoolean(EXIT_KEY,false);
 
         String list = itemList.getText().toString();
 
@@ -219,6 +239,18 @@ public class Room2 extends AppCompatActivity implements View.OnClickListener{
         } else {
             if(list.contains("리모컨 ")){
                 list.replace("리모컨 ","");
+                itemList.setText(list);
+            }
+        }
+
+        if(keyAvailable){
+            if(!(list.contains("열쇠 "))){
+                list += "열쇠 ";
+                itemList.setText(list);
+            }
+        } else {
+            if(list.contains("열쇠 ")){
+                list.replace("열쇠 ","");
                 itemList.setText(list);
             }
         }

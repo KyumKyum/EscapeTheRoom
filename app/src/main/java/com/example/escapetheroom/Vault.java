@@ -13,8 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 public class Vault extends AppCompatActivity implements View.OnClickListener {
 
     private static final int ANSWER = 3942;
+    private static final int ANSWER2 = 4521;
+    private static final String FINAL_ANSWER = "final";
     private static final String ANSWER1 = "answer1";
     private static final String RET_CODE = "Vault1";
+    private static final String RET_CODE2 = "Vault2";
 
 
     private Button one, two, three, four, five, six, seven, eight, nine, zero, clear, apply;
@@ -22,11 +25,15 @@ public class Vault extends AppCompatActivity implements View.OnClickListener {
     private Button ret;
 
     public Boolean openOrNot;
+    public Boolean finalVault;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.safe1);
+
+        Intent intent = getIntent();
+        finalVault = intent.getBooleanExtra(FINAL_ANSWER,false);
 
         textViewSafe = findViewById(R.id.text_view_safe1);
         one = findViewById(R.id.one);
@@ -115,14 +122,21 @@ public class Vault extends AppCompatActivity implements View.OnClickListener {
 
                 int yourAnswer = Integer.parseInt(input);
 
-                if(yourAnswer == ANSWER){
+                if(yourAnswer == ANSWER && !finalVault){
                     openOrNot = true;
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra(RET_CODE,true);
                     setResult(RESULT_OK,returnIntent);
                     finish();
 
-                } else{
+                }else if(yourAnswer == ANSWER2 && finalVault){
+                    openOrNot = true;
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(RET_CODE2,true);
+                    setResult(RESULT_OK,returnIntent);
+                    finish();
+                }
+                else{
                     openOrNot = false;
                     Toast.makeText(getApplicationContext(), "여전히 굳게 닫혀있다.\n아마 다르게 접근을 해야 하나보군.", Toast.LENGTH_SHORT).show();
                     Intent returnIntent = new Intent();

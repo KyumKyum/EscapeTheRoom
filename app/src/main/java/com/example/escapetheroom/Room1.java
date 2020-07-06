@@ -30,7 +30,8 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
     private static final String BROKEN = "vasebroken";
     private static final String REMOTE = "remote";
     private static final String DARK = "dark";
-
+    private static final String FINAL_ANSWER = "final";
+    private static final String ANSWER2 = "answer2";
 
     //Variables (widgets)
     private Button moveRight;
@@ -53,6 +54,8 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
     public Boolean vaseBroken;
     public Boolean remoteAvailable;
     public Boolean isDark;
+    public Boolean terminateAction;
+    public Boolean correct;
 
     SharedPreferences sharedPreferences;
 
@@ -81,6 +84,8 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
         hammerAvailable = false;
         remoteAvailable = false;
         isDark = false;
+        terminateAction = false;
+        correct = false;
 
         moveRight.setOnClickListener(this);
         doorExit.setOnClickListener(this);
@@ -111,16 +116,27 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
             case R.id.button_exit:
                 if(!doorKey){
                     Toast.makeText(this, "굳게 잠겨있다.\nEXIT이라고 써져있는 것을 보니, 여기로 나가는거겠지.", Toast.LENGTH_SHORT).show();
+                } else if(isDark){
+                    Toast.makeText(this, "어두워서 아무것도 못하겠군.", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case R.id.button_pic:
+                limitedAction();
+                if(terminateAction) {
+                    terminateAction = false;
+                    break;}
                 FamilyPic1 familyPic1 = new FamilyPic1(this);
                 familyPic1.show();
                 Toast.makeText(this, "어린아이가 그린것 같은 가족그림이다.\n순수함이 느껴지는군.", Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.button_books:
+                limitedAction();
+                if(terminateAction) {
+                    terminateAction = false;
+                    break;}
+
                 Hint1 hint1 = new Hint1(this);
                 hint1.show();
                 Toast.makeText(this, "책들 사이에 메모가 끼어져 있다.\n무슨 뜻이지?", Toast.LENGTH_SHORT).show();
@@ -128,9 +144,15 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
 
             case R.id.button_safe1:
 
+                limitedAction();
+                if(terminateAction) {
+                    terminateAction = false;
+                    break;}
+
                 if(!answer1){
 
                     Intent openVault = new Intent(this, Vault.class);
+                    openVault.putExtra(FINAL_ANSWER,false);
                     startActivityForResult(openVault,101);
 
                     Toast.makeText(this, "4자리 수를 입력할 수 있는 금고다.\n이걸 열어야지 탈출할 실마리를 얻을 수 있겠군.", Toast.LENGTH_LONG).show();
@@ -143,6 +165,11 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
                 break;
 
             case R.id.button_hammer:
+
+                limitedAction();
+                if(terminateAction) {
+                    terminateAction = false;
+                    break;}
 
                 if(answer1){
                     if(!hammerAvailable){
@@ -165,6 +192,12 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
                 break;
 
             case R.id.button_tv:
+
+                if(correct){
+                    Toast.makeText(this, "뭐야..뭐냐고...왜 불이 안켜지는거야..", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+
                 if(!remoteAvailable){
                     Toast.makeText(this, "...왜 'TV가 전등하고 연결'되어 있지?\n켤 수 있는 스위치도 없어.", Toast.LENGTH_SHORT).show();
                 } else {
@@ -183,10 +216,16 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
                 break;
 
             case R.id.button_vase:
+
+                limitedAction();
+                if(terminateAction) {
+                    terminateAction = false;
+                    break;}
+
                 if(vaseBroken){
                     Hint2 hint2 = new Hint2(this);
                     hint2.show();
-                    Toast.makeText(this, "......진정하자\n몇몇 글자만 색깔이 다른건 이유가 있을꺼야.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "......진정하자\n분명 숨겨진 의미가 있거나, 나중에 도움이 되는 단서가 될꺼야.", Toast.LENGTH_LONG).show();
                 } else{
 
                     if(!hammerAvailable){
@@ -250,6 +289,7 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
         vaseBroken = sharedPreferences.getBoolean(BROKEN,false);
         remoteAvailable = sharedPreferences.getBoolean(REMOTE,false);
         isDark = sharedPreferences.getBoolean(DARK,false);
+        correct = sharedPreferences.getBoolean(ANSWER2,false);
 
         String list = itemList.getText().toString();
 
@@ -277,7 +317,7 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
             }
         }
 
-        if(isDark){
+        if(isDark || correct ){
             dark.setVisibility(View.VISIBLE);
         } else {
             dark.setVisibility(View.INVISIBLE);
@@ -290,6 +330,13 @@ public class Room1 extends AppCompatActivity implements View.OnClickListener {
         super.onResume();
 
         updateData();
+    }
+
+    public void limitedAction(){
+        if(isDark){
+            Toast.makeText(this, "어두워서 아무것도 못하겠군.", Toast.LENGTH_SHORT).show();
+            terminateAction = true;
+        }
     }
 }
 
